@@ -5,8 +5,12 @@
 #include <ESPAsyncWebServer.h>
 #include <LiquidCrystal_I2C.h>
 
+#define RX2_PIN 16
+#define TX2_PIN 17
+
 const char* ssid = SECRET_SSID; // Your Wi-Fi SSID
 const char* password = SECRET_PASSWORD; // Your Wi-Fi Password
+
 String serverName = SERVER_NAME; 
 
 String dateTimeServer = "https://timeapi.io/api/time/current/zone?timeZone=Europe%2FBucharest"; //Server for date and time
@@ -25,7 +29,7 @@ SensorData sensorData;
 
 void setup() {
   Serial.begin(9600);
-  Serial2.begin(9600,SERIAL_8N1,16,17);
+  Serial2.begin(9600,SERIAL_8N1,RX2_PIN,TX2_PIN);
 
   lcd.init();
   lcd.backlight();
@@ -51,7 +55,7 @@ void setup() {
 void loop() {
   while(Serial2.available())
   {
-    Serial.println(receive(&sensorData));
+    receive(&sensorData);
     int temperature=sensorData.temperature;
     int humidity=sensorData.humidity;
     String date=getCurrentDate();
@@ -89,8 +93,7 @@ String parsePayload(String payload){
   return item;
 }
 
-bool receive(SensorData* sd)
-{
+bool receive(SensorData* sd){
   return (Serial2.readBytes((char*)sd, sizeof(SensorData)) == sizeof(SensorData));
 }
 
